@@ -9,5 +9,5 @@ license = "MIT"
 repository = "https://github.com/sharpvik/idioma/"
 
 [dependencies]
-colored = "*"
+colored = "2.0.0"
 
