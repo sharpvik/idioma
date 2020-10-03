@@ -13,7 +13,7 @@
 //! It means that my error messages
 //! - differ in style (since I regularly alter code in that util file);
 //! - don't look like idiomatic Rust messages;
-//! - require that `copy + paste` operation for every new project.
+//! - require that `COPY + PASTE` operation for every new project.
 //!
 //! And I strongly believe that I am not alone in this. Take a look at [this code][1] by
 //! [brain-lang]:
@@ -52,9 +52,10 @@
 //! Use within a function.
 //!
 //! ```
+//! use idioma::*;
 //! fn foo(i: i32) {
 //!     if i != 42 {
-//!         idioma::exit_with(error, "Your taste is appalling.")
+//!         error("Your taste is appalling.").exit_with();
 //!     }
 //! }
 //! ```
@@ -62,26 +63,100 @@
 extern crate colored;
 
 use std::{
-    fmt::Display,
+    fmt::{self, Display},
     process::exit,
 };
 use colored::*;
 
 
-/// Allows you to create and print messages with custom labels.
+/// `Text` is the main type that gets thrown around between functions and methods. It is basically a
+/// `String`, but it had to be made into a separate `struct` so that it would be possible to `impl`
+/// some things for it.
+#[derive(Debug)]
+pub struct Text {
+    text: String,
+}
+
+/// `Error` type is an alias of the `Text` type that we use to denote errors specifically. The fact
+/// that this is an alias also means that it has access to all the methods that `Text` has.
+pub type Error = Text;
+
+impl std::fmt::Display for Text {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.text)
+    }
+}
+
+impl Text {
+    /// Returns `Text` by constructing it from a given `label` and `message`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use idioma::*;
+    /// use colored::*;
+    /// Text::make("lol".cyan().bold(), "LMAO you're so funny.");
+    /// ```
+    pub fn make<I>(label: ColoredString, message: I) -> Self where I: Display {
+        Self {
+            text: format!("{}{} {}", label, ":".bold(), message),
+        }
+    }
+
+    /// Displays `Text` thanks to the `std::fmt::Display` trait.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use idioma::*;
+    /// warning("This message is going to be printed out immediately!").display();
+    /// ```
+    pub fn display(&self) { println!("{}", self) }
+
+    /// Displays `message` and terminates the program via `std::process::exit(1)`. Please note that
+    /// this function returns `Text` back in case we need to please the type checker. See
+    /// `exit_if_error` function for an example of that.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use idioma::*;
+    /// error("You were not supposed to mess with me!").exit_with();
+    /// ```
+    ///
+    /// You can even combine `custom` and `exit_with` to produce some real nice stuff.
+    ///
+    /// ```
+    /// use idioma::*;
+    /// use colored::*;
+    /// custom("lol".cyan().bold())("Did you expect something serious here? LMAO XD").exit_with();
+    /// ```
+    #[allow(unreachable_code)]
+    pub fn exit_with(self) -> Self {
+        self.display();
+        exit(1);
+        self
+    }
+}
+
+
+/// Allows you to create and print messages with custom labels. Essentially, allows you to write
+/// your own functions like `error`, `info`, etc. that we already have here.
 ///
 /// # Example
 ///
 /// ```
 /// use idioma::*;
 /// use colored::*;
-/// custom("custom".blue().bold())("This is a custom label. You can make one too!");
+/// let custom_label = custom("custom".blue().bold());
+/// custom_label("This is a custom label. You can make one too!");
+/// custom_label("Declare it once and reuse.");
 /// ```
-pub fn custom<I>(label: ColoredString) -> impl Fn(I) where I: Display {
-    move |message| println!("{}{} {}", label, ":".bold(), message)
+pub fn custom<I>(label: ColoredString) -> impl Fn(I) -> Text where I: Display {
+    move |message| Text::make(label.clone(), message)
 }
 
-/// Displays a success message.
+/// Returns a green and shiny success message.
 ///
 /// # Example
 ///
@@ -89,8 +164,8 @@ pub fn custom<I>(label: ColoredString) -> impl Fn(I) where I: Display {
 /// use idioma::*;
 /// success("A man of honour must always strive for a greater success in life.");
 /// ```
-pub fn success<I>(message: I) where I: Display {
-    custom("success".green().bold())(message);
+pub fn success<I>(message: I) -> Text where I: Display {
+    Text::make("success".green().bold(), message)
 }
 
 /// Displays a warning.
@@ -101,11 +176,11 @@ pub fn success<I>(message: I) where I: Display {
 /// use idioma::*;
 /// warning("Very soon, you will run out of water.");
 /// ```
-pub fn warning<I>(message: I) where I: Display {
-    custom("warning".yellow().bold())(message);
+pub fn warning<I>(message: I) -> Text where I: Display {
+    Text::make("warning".yellow().bold(), message)
 }
 
-/// Displays a neutral info message.
+/// Returns a neutral info message.
 ///
 /// # Example
 ///
@@ -114,11 +189,11 @@ pub fn warning<I>(message: I) where I: Display {
 /// info("I came here to write some code and kiss some pretty ladies and, as you can see, \
 ///       I'm done with the code.");
 /// ```
-pub fn info<I>(message: I) where I: Display {
-    custom("info".purple().bold())(message);
+pub fn info<I>(message: I) -> Text where I: Display {
+    Text::make("info".purple().bold(), message)
 }
 
-/// Displays a bright-red error message that draws attention.
+/// Returns a bright-red error message that draws attention.
 ///
 /// # Example
 ///
@@ -126,27 +201,21 @@ pub fn info<I>(message: I) where I: Display {
 /// use idioma::*;
 /// error("You were not supposed to mess with me!");
 /// ```
-pub fn error<I>(message: I) where I: Display {
-    custom("error".red().bold())(message);
+pub fn error<I>(message: I) -> Error where I: Display {
+    Text::make("error".red().bold(), message)
 }
 
-/// Calls `callback` with `message` and terminates the program via `std::process::exit(1)`.
-///
-/// # Examples
-///
-/// ```
-/// use idioma::*;
-/// exit_with(error, "You were not supposed to mess with me!");
-/// ```
-///
-/// You can even combine `custom` and `exit_with` to produce some real nice stuff.
-///
-/// ```
-/// use idioma::*;
-/// use colored::*;
-/// exit_with(custom("lol".cyan().bold()), "Did you expect something serious here? LMAO XD");
-/// ```
-pub fn exit_with<C, I>(callback: C, message: I) where C: Fn(I), I: Display {
-    callback(message);
-    exit(1);
+
+pub fn into<O, E>(result: Result<O, E>) -> Result<O, Error> where E: Display {
+    match result {
+        Ok(o) => Ok(o),
+        Err(e) => Err(error(e)),
+    }
+}
+
+pub fn exit_if_error<O>(result: Result<O, Error>) -> Result<O, Error> {
+    match result {
+        Ok(o) => Ok(o),
+        Err(e) => Err(e.exit_with()),
+    }
 }
