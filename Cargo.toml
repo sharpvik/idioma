@@ -3,6 +3,10 @@ name = "idioma"
 version = "0.0.1"
 authors = ["Viktor A. Rozenko Voitenko <sharp.vik@gmail.com>"]
 edition = "2018"
+description = "Print Rust'y error messages"
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/sharpvik/idioma/"
 
 [dependencies]
 colored = "*"
