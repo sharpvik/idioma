@@ -10,4 +10,3 @@ repository = "https://github.com/sharpvik/idioma/"
 
 [dependencies]
 colored = "2.0.0"
-
