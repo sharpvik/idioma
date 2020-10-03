@@ -79,8 +79,10 @@ spicy humour!
 
 [doc comments]: https://doc.rust-lang.org/stable/rust-by-example/meta/doc.html
 
-To see what's already there, visit [crates.io](https://crates.io/crates/idioma/)
-where you can see full documentation with links to source code.
+To see what's already there, visit [docs.rs] where you can see full
+documentation with links to source code.
+
+[docs.rs]: https://docs.rs/idioma/
 
 
 
