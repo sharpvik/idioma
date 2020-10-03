@@ -58,7 +58,7 @@ Use within a function.
 ```rust
 fn foo(i: i32) {
     if i != 42 {
-        idioma::exit_with(error, "Your taste is appalling.")
+        error("Your taste is appalling.").exit_with();
     }
 }
 ```
