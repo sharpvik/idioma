@@ -36,8 +36,6 @@ As you can see, they wrote this macro right next to the `main` function and it
 is the same problem that I have with my util file. The `idioma` library solves
 all these issues forever. Here's how.
 
-
-
 ## Use me, baby!
 
 In your `Cargo.toml` file.
@@ -58,12 +56,10 @@ Use within a function.
 ```rust
 fn foo(i: i32) {
     if i != 42 {
-        error("Your taste is appalling.").exit_with();
+        error("Your taste is appalling.").exit(1);
     }
 }
 ```
-
-
 
 ## Development
 
@@ -84,8 +80,6 @@ documentation with links to source code.
 
 [docs.rs]: https://docs.rs/idioma/
 
-
-
 ## License
 
 I don't know why, but this code is licensed under the MIT license which means
@@ -101,8 +95,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-
-
--------------------------------------------------------------------------------
+---
 
 I know that it's cringe, but I really made it with ❤️ so 😘 bye-bye.
