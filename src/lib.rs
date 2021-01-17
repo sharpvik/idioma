@@ -177,6 +177,21 @@ where
     Text::make("success".green().bold(), message)
 }
 
+/// Debug your code with style.
+///
+/// # Example
+///
+/// ```
+/// use idioma::*;
+/// debug("The nuclear missiles have been launched!");
+/// ```
+pub fn debug<D>(message: D) -> Text
+where
+    D: Display,
+{
+    Text::make("debug".blue().bold(), message)
+}
+
 /// Displays a warning.
 ///
 /// # Example
@@ -223,6 +238,11 @@ where
     Text::make("error".red().bold(), message)
 }
 
+/// Use `into` to turn any `Result` type with a displayable error into `Result<O, idioma::Error>`.
+/// This will allow you to use all methods and functions defined for `idioma::Error` without having
+/// to explicitly wrap errors from other libraries yourself.
+///
+/// See an example in `src/bin/result.rs`.
 pub fn into<O, E>(result: Result<O, E>) -> Result<O, Error>
 where
     E: Display,
@@ -233,6 +253,21 @@ where
     }
 }
 
+/// Somethimes you get a `Result` and you want to continue execution as normal if case it's `Ok` or
+/// exit if it's `Err`. This function allows you to do precisely that.
+///
+/// It gives you back the `Result`, but you will only ever be able to actually touch it if you
+/// passed in an `Ok` because `exit_if_error` will simply terminate on `Err`. Therefore, you can do
+/// something like this:
+///
+/// ```
+/// use idioma::*;
+/// let message = exit_if_error(Ok("hello world")).unwrap();
+/// println!(message);
+/// ```
+///
+/// In this case, the call to `unwrap` is totally safe. In some cases, compiler
+/// will shout at you for doing that, so just give it `#[allow(unused)]`.
 pub fn exit_if_error<O>(result: Result<O, Error>) -> Result<O, Error> {
     match result {
         Ok(o) => Ok(o),
